@@ -84,11 +84,11 @@ public class PubSubHandler implements PacketInterceptor
             return;
         }
 
-        if (!stanza.getFrom().equals(service)) {
+        if (!service.equals(stanza.getFrom())) {
             return;
         }
 
-        if (!stanza.getTo().equals(selfAddress)) {
+        if (!selfAddress.equals(stanza.getTo())) {
             return;
         }
 
