@@ -104,11 +104,11 @@ public class BlockList
         }
     }
 
-    public void addAll(final Collection<String> hashes) {
+    public void addAll(final Map<String, String> hashes) {
         final Map<String, String> toAdd = new HashMap<>();
-        for (final String hash : hashes) {
-            if (hash != null && hash.matches("^[a-fA-F0-9]{64}$")) {
-                toAdd.put(hash, "");
+        for (final Map.Entry<String, String> hash : hashes.entrySet()) {
+            if (hash.getKey() != null && hash.getKey().matches("^[a-fA-F0-9]{64}$")) {
+                toAdd.put(hash.getKey(), hash.getValue());
             }
         }
 
@@ -135,9 +135,9 @@ public class BlockList
         }
     }
 
-    public void add(final String hash)
+    public void add(final String hash, final String reason)
     {
-        addAll(Collections.singletonList(hash));
+        addAll(Collections.singletonMap(hash, reason));
     }
 
     public void removeAll(final Collection<String> hashes) {
@@ -172,11 +172,11 @@ public class BlockList
         removeAll(Collections.singletonList(hash));
     }
 
-    public Set<String> getAll() {
+    public Map<String, String> getAll() {
         final Lock lock = blockedHashes.getLock(CACHE_MUTEX);
         try {
             lock.lock();
-            return new HashSet<>(blockedHashes.keySet());
+            return new HashMap<>(blockedHashes);
         } finally {
             lock.unlock();
         }

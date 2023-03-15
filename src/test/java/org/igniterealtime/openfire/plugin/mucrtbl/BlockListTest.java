@@ -62,7 +62,7 @@ public class BlockListTest
     {
         // Setup test fixture.
         final BlockList bl = new BlockList();
-        bl.add("60eb02d00ee3bdd0c46d9c6a360037882a9137902f3533a78fa73aae2ec9dbe2"); // unit-test-not-on-list@example.com
+        bl.add("60eb02d00ee3bdd0c46d9c6a360037882a9137902f3533a78fa73aae2ec9dbe2", "unit-test"); // unit-test-not-on-list@example.com
         final JID target = new JID("unit-test@xmpp.org/resource");
 
         // Execute system under test
@@ -80,7 +80,7 @@ public class BlockListTest
     {
         // Setup test fixture.
         final BlockList bl = new BlockList();
-        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"); // unit-test@xmpp.org
+        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d", "unit-test"); // unit-test@xmpp.org
         final JID target = new JID("unit-test@xmpp.org");
 
         // Execute system under test
@@ -98,7 +98,7 @@ public class BlockListTest
     {
         // Setup test fixture.
         final BlockList bl = new BlockList();
-        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"); // unit-test@xmpp.org
+        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d", "unit-test"); // unit-test@xmpp.org
         final JID target = new JID("unit-test@xmpp.org/resource");
 
         // Execute system under test
@@ -116,7 +116,7 @@ public class BlockListTest
     {
         // Setup test fixture.
         final BlockList bl = new BlockList();
-        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"); // unit-test@xmpp.org
+        bl.add("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d", "unit-test"); // unit-test@xmpp.org
         bl.remove("bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d");
         final JID target = new JID("unit-test@xmpp.org/resource");
 
