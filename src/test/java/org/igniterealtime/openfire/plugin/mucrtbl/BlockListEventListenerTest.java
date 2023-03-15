@@ -27,6 +27,8 @@ import org.xmpp.packet.JID;
 import org.mockito.junit.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -59,7 +61,7 @@ public class BlockListEventListenerTest
         final String needle = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
 
         // Execute system under test
-        bl.add(needle);
+        bl.add(needle, "");
 
         // Verify results
         final ArgumentCaptor<Set<String>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
@@ -81,9 +83,12 @@ public class BlockListEventListenerTest
         bl.register(eventListener);
         final String needleA = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
         final String needleB = "8f96e8e5f1f082c2d56d15db2a9f4888040a621c02bdd0b4375d1f51bc96991a"; // hash of: unit-test-too@example.org
+        final Map<String, String> input = new HashMap<>();
+        input.put(needleA, "test");
+        input.put(needleB, "unit-test");
 
         // Execute system under test
-        bl.addAll(Arrays.asList(needleA, needleB));
+        bl.addAll(input);
 
         // Verify results
         final ArgumentCaptor<Set<String>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
@@ -107,7 +112,7 @@ public class BlockListEventListenerTest
         final String needle = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
 
         // Execute system under test
-        bl.add(needle);
+        bl.add(needle, "unit-test");
         bl.remove(needle);
 
         // Verify results
@@ -131,9 +136,12 @@ public class BlockListEventListenerTest
         bl.register(eventListener);
         final String needleA = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
         final String needleB = "8f96e8e5f1f082c2d56d15db2a9f4888040a621c02bdd0b4375d1f51bc96991a"; // hash of: unit-test-too@example.org
+        final Map<String, String> input = new HashMap<>();
+        input.put(needleA, "test");
+        input.put(needleB, "unit-test");
 
         // Execute system under test
-        bl.addAll(Arrays.asList(needleA, needleB));
+        bl.addAll(input);
         bl.removeAll(Arrays.asList(needleA, needleB));
 
         // Verify results
@@ -159,9 +167,9 @@ public class BlockListEventListenerTest
         final String needle = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
 
         // Execute system under test
-        bl.add(needle);
+        bl.add(needle, "unit-test");
         Mockito.reset(eventListener);
-        bl.add(needle);
+        bl.add(needle, "test");
 
         // Verify results
         Mockito.verify(eventListener, Mockito.never()).added(Mockito.anySet());
@@ -204,9 +212,9 @@ public class BlockListEventListenerTest
         final String needleB = "8f96e8e5f1f082c2d56d15db2a9f4888040a621c02bdd0b4375d1f51bc96991a"; // hash of: unit-test-too@example.org
 
         // Execute system under test
-        bl.add(needleA);
+        bl.add(needleA, "unit-test");
         Mockito.reset(eventListener);
-        bl.add(needleB);
+        bl.add(needleB,"test");
 
         // Verify results
         final ArgumentCaptor<Set<String>> argumentCaptor = ArgumentCaptor.forClass(Set.class);
@@ -232,7 +240,7 @@ public class BlockListEventListenerTest
         final String needleB = "8f96e8e5f1f082c2d56d15db2a9f4888040a621c02bdd0b4375d1f51bc96991a"; // hash of: unit-test-too@example.org
 
         // Execute system under test
-        bl.add(needleB);
+        bl.add(needleB, "unit-test");
         bl.removeAll(Arrays.asList(needleA, needleB));
 
         // Verify results
@@ -260,7 +268,7 @@ public class BlockListEventListenerTest
         final String needle = "bd42ad42bf32b98a903f3c3eb5206d9bb318df597db9df7167ed6659db4b3f7d"; // hash of: unit-test@xmpp.org
 
         // Execute system under test
-        blB.add(needle);
+        blB.add(needle, "unit-test");
 
         // Verify results
         Mockito.verifyNoMoreInteractions(eventListener);

@@ -16,6 +16,7 @@
 package org.igniterealtime.openfire.plugin.mucrtbl;
 
 import org.dom4j.Element;
+import org.dom4j.QName;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.jivesoftware.openfire.interceptor.PacketInterceptor;
@@ -29,9 +30,7 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
 import org.xmpp.packet.Packet;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Interacts with the Pub/Sub service and node (XEP-0060) on which the block list is maintained.
@@ -198,12 +197,7 @@ public class PubSubHandler implements PacketInterceptor
         }
 
         // Received new to-be-banned nodes.
-        final Set<String> hashes = new HashSet<>();
-        final List<Element> items = itemsEl.elements("item");
-        for (final Element item : items) {
-            final String itemId = item.attributeValue("id");
-            hashes.add(itemId);
-        }
+        final Map<String, String> hashes = extractHashesFromPubsubItems(itemsEl);
 
         Log.debug("Received a list of hashes from the block list. List size: {}", hashes.size());
         if (!hashes.isEmpty()) {
@@ -252,17 +246,48 @@ public class PubSubHandler implements PacketInterceptor
         }
 
         // Add new items to the blocklist.
-        final Set<String> hashesAdded = new HashSet<>();
-        for (final Element itemEl : itemsEl.elements("item")) {
-            final String id = itemEl.attributeValue("id");
-            if (id != null) {
-                hashesAdded.add(id);
-            }
-        }
+        final Map<String, String> hashesAdded = extractHashesFromPubsubItems(itemsEl);
 
         if (!hashesAdded.isEmpty()) {
             Log.debug("Received hash(es) from the pubsub service that are added to the block list. List size: {}", hashesAdded.size());
             blockList.addAll(hashesAdded);
         }
+    }
+
+    static Map<String, String> extractHashesFromPubsubItems(final Element itemsEl)
+    {
+        final Map<String, String> results = new HashMap<>();
+        final List<Element> items = itemsEl.elements("item");
+        for (final Element item : items) {
+            final String itemId = item.attributeValue("id");
+
+            // Best-effort parsing of a reason, from the item payload that presumably is XEP-0377.
+            String reason = "";
+            try {
+                final Element report = item.element(QName.get("report", "urn:xmpp:reporting:1"));
+                if (report != null) {
+                    final String reasonValue = report.attributeValue("reason");
+                    if ("urn:xmpp:reporting:spam".equals(reasonValue)) {
+                        reason = "Spam";
+                    }
+                    if ("urn:xmpp:reporting:abuse".equals(reasonValue)) {
+                        reason = "Abuse";
+                    }
+                    final String text = report.elementTextTrim("text");
+                    if (text != null && !text.isEmpty()) {
+                        if (!reason.isEmpty()) {
+                            reason += ": ";
+                        }
+                        reason += text;
+                    }
+                }
+                Log.trace("Identified for item '{}' reason: {}", itemId, reason);
+            } catch (Exception e) {
+                Log.warn("Unable to parse reason from item with ID {}", itemId, e);
+            }
+
+            results.put(itemId, reason);
+        }
+        return results;
     }
 }

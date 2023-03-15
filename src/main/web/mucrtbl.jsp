@@ -84,7 +84,7 @@
     pageContext.setAttribute( "serviceNode", MucRealTimeBlockListPlugin.BLOCKLIST_SERVICE_NODE.getValue() );
     pageContext.setAttribute( "stanzaBlockerEnabled", !MucRealTimeBlockListPlugin.BLOCKLIST_STANZABLOCKER_DISABLED.getValue() );
     pageContext.setAttribute( "occupantRemoverEnabled", !MucRealTimeBlockListPlugin.BLOCKLIST_OCCUPANTREMOVER_DISABLED.getValue() );
-    pageContext.setAttribute( "hashes", plugin.getBlockList() == null ? Collections.emptySet() : plugin.getBlockList().getAll() );
+    pageContext.setAttribute( "hashes", plugin.getBlockList() == null ? Collections.emptyMap() : plugin.getBlockList().getAll() );
 %>
 <html>
 <head>
@@ -190,8 +190,8 @@
     <c:if test="${hashes.size() < 50 && hashes.size() > 0}">
         <p><fmt:message key="mucrtbl.page.content.hashes"/></p>
         <ul style="margin: 1em; list-style: initial">
-            <c:forEach items="${hashes}" var="hash">
-                <li style="list-style: initial"><code></code><c:out value="${hash}"/></li>
+            <c:forEach items="${hashes}" var="entry">
+                <li style="list-style: initial"><code><c:out value="${entry.key}"/></code> <c:out value="${entry.value}"/></li>
             </c:forEach>
         </ul>
     </c:if>
