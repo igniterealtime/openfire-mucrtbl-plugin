@@ -41,7 +41,7 @@ public class BlockList
     public BlockList() {
         blockedHashes = CacheFactory.createCache("MUC RealTime Block List");
         blockedHashes.setMaxCacheSize(-1L);
-        blockedHashes.setMaxCacheSize(-1L);
+        blockedHashes.setMaxLifetime(-1L);
     }
 
     /**
