@@ -6,7 +6,7 @@
     <description>${project.description}</description>
     <author>Guus der Kinderen</author>
     <version>${project.version}</version>
-    <date>2023-02-24</date>
+    <date>2023-03-15</date>
     <minServerVersion>4.7.0</minServerVersion>
 
     <adminconsole>

@@ -15,6 +15,7 @@
  */
 package org.igniterealtime.openfire.plugin.mucrtbl;
 
+import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.cache.Cache;
 import org.jivesoftware.util.cache.CacheFactory;
@@ -40,7 +41,7 @@ public class BlockList
 
     public BlockList() {
         blockedHashes = CacheFactory.createCache("MUC RealTime Block List");
-        blockedHashes.setMaxCacheSize(-1L);
+        blockedHashes.setMaxCacheSize(25L * 1024 * 1024);
         blockedHashes.setMaxLifetime(-1L);
     }
 
