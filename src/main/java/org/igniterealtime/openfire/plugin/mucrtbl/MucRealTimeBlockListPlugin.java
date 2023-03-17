@@ -48,6 +48,7 @@ public class MucRealTimeBlockListPlugin implements Plugin
     public static final SystemProperty<JID> BLOCKLIST_SERVICE_JID = SystemProperty.Builder.ofType(JID.class)
         .setKey("plugin.mucrtbl.blocklist.service")
         .setPlugin("MUC Real-Time Block List")
+        .setDefaultValue(new JID("xmppbl.org"))
         .setDynamic(true)
         .addListener(o -> reInit())
         .build();
@@ -55,6 +56,7 @@ public class MucRealTimeBlockListPlugin implements Plugin
     public static final SystemProperty<String> BLOCKLIST_SERVICE_NODE = SystemProperty.Builder.ofType(String.class)
         .setKey("plugin.mucrtbl.blocklist.node")
         .setPlugin("MUC Real-Time Block List")
+        .setDefaultValue("muc_bans_sha256")
         .setDynamic(true)
         .addListener(o -> reInit())
         .build();
