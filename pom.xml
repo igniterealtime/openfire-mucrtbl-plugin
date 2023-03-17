@@ -12,7 +12,7 @@
 
     <groupId>org.igniterealtime.openfire.plugins</groupId>
     <artifactId>mucrtbl</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <name>MUC Real-Time Block List</name>
     <description>A plugin that subscribes to a real-time block list for MUC rooms, using pub/sub.</description>
