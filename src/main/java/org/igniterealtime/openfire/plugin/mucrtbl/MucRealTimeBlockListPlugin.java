@@ -17,17 +17,22 @@ package org.igniterealtime.openfire.plugin.mucrtbl;
 
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
+import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.muc.MUCEventDelegate;
 import org.jivesoftware.openfire.muc.spi.MultiUserChatServiceImpl;
 import org.jivesoftware.util.SystemProperty;
+import org.jivesoftware.util.TaskEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.TimerTask;
 
 public class MucRealTimeBlockListPlugin implements Plugin
 {
@@ -42,6 +47,8 @@ public class MucRealTimeBlockListPlugin implements Plugin
     private StanzaBlocker stanzaBlocker;
 
     private OccupantRemover occupantRemover;
+
+    private RefreshTask refreshTask;
 
     public static boolean reinitOnConfigChange = true;
 
@@ -73,6 +80,24 @@ public class MucRealTimeBlockListPlugin implements Plugin
         .setKey("plugin.mucrtbl.blocklist.occupantremover.disabled")
         .setPlugin("MUC Real-Time Block List")
         .setDefaultValue(false)
+        .setDynamic(true)
+        .addListener(o -> reInit())
+        .build();
+
+    public static final SystemProperty<Boolean> BLOCKLIST_REFRESHTASK_DISABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setKey("plugin.mucrtbl.blocklist.refreshtask.disabled")
+        .setPlugin("MUC Real-Time Block List")
+        .setDefaultValue(false)
+        .setDynamic(true)
+        .addListener(o -> reInit())
+        .build();
+
+    public static final SystemProperty<Duration> BLOCKLIST_REFRESHTASK_INTERVAL = SystemProperty.Builder.ofType(Duration.class)
+        .setKey("plugin.mucrtbl.blocklist.refreshtask.interval")
+        .setPlugin("MUC Real-Time Block List")
+        .setDefaultValue(Duration.ofHours(6))
+        .setMinValue(Duration.ofSeconds(10))
+        .setChronoUnit(ChronoUnit.SECONDS)
         .setDynamic(true)
         .addListener(o -> reInit())
         .build();
@@ -116,6 +141,11 @@ public class MucRealTimeBlockListPlugin implements Plugin
         } catch (UnauthorizedException e) {
             throw new RuntimeException(e);
         }
+
+        if (!BLOCKLIST_REFRESHTASK_DISABLED.getValue()) {
+            refreshTask = new RefreshTask();
+            TaskEngine.getInstance().schedule(refreshTask, BLOCKLIST_REFRESHTASK_INTERVAL.getValue().toMillis(), BLOCKLIST_REFRESHTASK_INTERVAL.getValue().toMillis());
+        }
         Log.debug("Started.");
     }
 
@@ -123,6 +153,11 @@ public class MucRealTimeBlockListPlugin implements Plugin
     public void destroyPlugin()
     {
         Log.info("Stopping...");
+        if (refreshTask != null) {
+            TaskEngine.getInstance().cancelScheduledTask(refreshTask);
+            refreshTask = null;
+        }
+
         if (occupantRemover != null) {
             blockList.unregister(occupantRemover);
             occupantRemover = null;
@@ -191,5 +226,20 @@ public class MucRealTimeBlockListPlugin implements Plugin
 
     public BlockList getBlockList() {
         return blockList;
+    }
+
+    /**
+     * A task that refreshes the block list content, by requesting all items from the configured service.
+     */
+    public class RefreshTask extends TimerTask
+    {
+        @Override
+        public void run()
+        {
+            if (ClusterManager.isSeniorClusterMember()) {
+                Log.info("Starting periodic refresh of the block list.");
+                pubSubHandler.requestAllItems(BLOCKLIST_SERVICE_JID.getValue(), BLOCKLIST_SERVICE_NODE.getValue());
+            }
+        }
     }
 }
