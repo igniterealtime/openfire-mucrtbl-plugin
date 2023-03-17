@@ -112,7 +112,7 @@ public class BlockList
      * Adds a collection of hashes of a JIDs to the block list, with an optional human-readable reason for why the entry
      * was added to the block list.
      *
-     * The hashes that is provided is expected to be of a normalized JID that is either a bare, or consist of only a
+     * Each of the hashes that is provided is expected to be of a normalized JID that is either a bare, or consist of only a
      * domain-part.
      *
      * @param hashes A map of hashes to be added, mapped to optional human-readible reasons for the hashes to be added.
