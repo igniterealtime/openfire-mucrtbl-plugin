@@ -21,6 +21,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xmpp.packet.JID;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.*;
 
 /**
@@ -128,4 +133,112 @@ public class BlockListTest
         assertFalse(result);
     }
 
+    /**
+     * Verifies that a JID is detected 'on the block list' if the target is a bare JID matching a domain JID that is on the list.
+     */
+    @Test
+    public void testTargetDomainOnBlockList() throws Exception
+    {
+        // Setup test fixture.
+        final BlockList bl = new BlockList();
+        bl.add("bfabc37432958b063360d3ad6461c9c4735ae7f8edd46592a5e0f01452b2e4b5", "unit-test"); // example.org
+        final JID target = new JID("unit-test@example.org");
+
+        // Execute system under test
+        final boolean result = bl.contains(target);
+
+        // Verify results;
+        assertTrue(result);
+    }
+
+    /**
+     * Verifies that a JID is detected 'on the block list' if the target is a bare JID does not match a block list that
+     * only contains a domain JID (for a different domain).
+     */
+    @Test
+    public void testTargetDomainNotOnBlockList() throws Exception
+    {
+        // Setup test fixture.
+        final BlockList bl = new BlockList();
+        bl.add("bfabc37432958b063360d3ad6461c9c4735ae7f8edd46592a5e0f01452b2e4b5", "unit-test"); // example.org
+        final JID target = new JID("unit-test@example.com");
+
+        // Execute system under test
+        final boolean result = bl.contains(target);
+
+        // Verify results;
+        assertFalse(result);
+    }
+
+    /**
+     * Verifies that {@link BlockList#filterBlocked(Collection)} does not identify any JID if the block list is empty.
+     */
+    @Test
+    public void testFilterBlockedEmptyBlocklist() throws Exception
+    {
+        final BlockList bl = new BlockList();
+        final Collection<JID> input = Arrays.asList(new JID("unit-test@example.com"));
+
+        // Execute system under test
+        final Collection<JID> result = bl.filterBlocked(input);
+
+        // Verify results;
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Verifies that {@link BlockList#filterBlocked(Collection)} does not identify any JID if the provided collection
+     * of JIDs to check is empty.
+     */
+    @Test
+    public void testFilterBlockedEmptyInput() throws Exception
+    {
+        final BlockList bl = new BlockList();
+        bl.add("7d8fb65cd03bbb40033ff79454b2ef8c95d654e8eff8fa5e2770492d9aa31e56", "unit-test"); // unit-test@example.org
+        final Collection<JID> input = Collections.emptyList();
+
+        // Execute system under test
+        final Collection<JID> result = bl.filterBlocked(input);
+
+        // Verify results;
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Verifies that {@link BlockList#filterBlocked(Collection)} only returns provided JIDs when they're on the block list.
+     */
+    @Test
+    public void testFilterBlocked() throws Exception
+    {
+        final BlockList bl = new BlockList();
+        bl.add("7d8fb65cd03bbb40033ff79454b2ef8c95d654e8eff8fa5e2770492d9aa31e56", "unit-test"); // unit-test@example.org
+        final Collection<JID> input = Arrays.asList(new JID("unit-test@example.org"), new JID("test-unit@example.com"));
+
+        // Execute system under test
+        final Collection<JID> result = bl.filterBlocked(input);
+
+        // Verify results;
+        final Collection<JID> expected = Arrays.asList(new JID("unit-test@example.org"));
+        assertEquals(expected.size(), result.size());
+        assertTrue(result.containsAll(expected));
+    }
+
+    /**
+     * Verifies that {@link BlockList#filterBlocked(Collection)} returns provided JIDs when their domain-part is on the block list.
+     */
+    @Test
+    public void testFilterBlockedDomain() throws Exception
+    {
+        final BlockList bl = new BlockList();
+        bl.add("bfabc37432958b063360d3ad6461c9c4735ae7f8edd46592a5e0f01452b2e4b5", "unit-test"); // example.org
+        final Collection<JID> input = Arrays.asList(new JID("unit-test@example.org"), new JID("test-unit@example.com"), new JID("foo-bar@example.org"));
+
+        // Execute system under test
+        final Collection<JID> result = bl.filterBlocked(input);
+
+        // Verify results;
+        final Collection<JID> expected = Arrays.asList(new JID("foo-bar@example.org"), new JID("unit-test@example.org"));
+        assertEquals(expected.size(), result.size());
+        assertTrue(result.containsAll(expected));
+    }
 }
