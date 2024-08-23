@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2023-2024 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
@@ -62,7 +60,10 @@ public class OccupantRemover implements BlockListEventListener
         for (MultiUserChatService service : multiUserChatServices)
         {
             // Use the JIDs of all occupants of MUC rooms of the service
-            final Map<JID, Set<OccupantManager.Occupant>> occupantsByJID = service.getOccupantManager().getNodesByOccupant().keySet().stream()
+            final Collection<OccupantManager.Occupant> allOccupants = new HashSet<>();
+            service.getOccupantManager().getLocalOccupantsByNode().values().forEach(allOccupants::addAll);
+            allOccupants.addAll(service.getOccupantManager().getFederatedOccupants());
+            final Map<JID, Set<OccupantManager.Occupant>> occupantsByJID = allOccupants.stream()
                 .collect(Collectors.groupingBy(OccupantManager.Occupant::getRealJID, Collectors.toSet()));
 
             // Determine which of these JIDs are on the blocklist (if any). Note that this operates on the entire block

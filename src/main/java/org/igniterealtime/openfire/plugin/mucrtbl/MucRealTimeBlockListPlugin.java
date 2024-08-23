@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2023-2024 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ public class MucRealTimeBlockListPlugin implements Plugin
 
         if (!BLOCKLIST_REFRESHTASK_DISABLED.getValue()) {
             refreshTask = new RefreshTask();
-            TaskEngine.getInstance().schedule(refreshTask, BLOCKLIST_REFRESHTASK_INTERVAL.getValue().toMillis(), BLOCKLIST_REFRESHTASK_INTERVAL.getValue().toMillis());
+            TaskEngine.getInstance().schedule(refreshTask, BLOCKLIST_REFRESHTASK_INTERVAL.getValue(), BLOCKLIST_REFRESHTASK_INTERVAL.getValue());
         }
         Log.debug("Started.");
     }
